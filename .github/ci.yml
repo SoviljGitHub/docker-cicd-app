@@ -20,5 +20,5 @@ jobs:
 
       - name: Test app
         run: |
-          sleep 5
+          sleep 10
           curl http://localhost:3000/health

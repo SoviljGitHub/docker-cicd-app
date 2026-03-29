@@ -12,74 +12,62 @@ mongoose.connect("mongodb://mongo:27017/tasks")
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("DB error:", err));
 
-// model
+// 🔥 PRO model (proširen)
 const Task = mongoose.model("Task", {
   title: String,
+  completed: { type: Boolean, default: false },
+  category: { type: String, default: "General" },
+  priority: { type: String, default: "low" },
+  createdAt: { type: Date, default: Date.now }
 });
 
 // ======================= ROUTES =======================
 
-// GET - svi taskovi
+// GET
 app.get("/tasks", async (req, res) => {
-  try {
-    const tasks = await Task.find();
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ error: "Greška pri čitanju taskova" });
-  }
+  const tasks = await Task.find();
+  res.json(tasks);
 });
 
-// POST - dodaj task
+// POST
 app.post("/tasks", async (req, res) => {
-  try {
-    if (!req.body.title) {
-      return res.status(400).json({ error: "Title je obavezan" });
-    }
-
-    const task = new Task({ title: req.body.title });
-    await task.save();
-
-    res.status(201).json(task);
-  } catch (err) {
-    res.status(500).json({ error: "Greška pri čuvanju taska" });
+  if (!req.body.title) {
+    return res.status(400).json({ error: "Title je obavezan" });
   }
+
+  const task = new Task({
+    title: req.body.title,
+    category: req.body.category,
+    priority: req.body.priority
+  });
+
+  await task.save();
+  res.status(201).json(task);
 });
 
-// PUT - update task
+// PUT
 app.put("/tasks/:id", async (req, res) => {
-  try {
-    const updated = await Task.findByIdAndUpdate(
-      req.params.id,
-      { title: req.body.title },
-      { new: true }
-    );
+  const updated = await Task.findByIdAndUpdate(
+    req.params.id,
+    {
+      title: req.body.title,
+      completed: req.body.completed,
+      category: req.body.category,
+      priority: req.body.priority
+    },
+    { new: true }
+  );
 
-    if (!updated) {
-      return res.status(404).json({ error: "Task ne postoji" });
-    }
-
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Greška pri update-u" });
-  }
+  res.json(updated);
 });
 
-// DELETE - obrisi task
+// DELETE
 app.delete("/tasks/:id", async (req, res) => {
-  try {
-    const deleted = await Task.findByIdAndDelete(req.params.id);
-
-    if (!deleted) {
-      return res.status(404).json({ error: "Task ne postoji" });
-    }
-
-    res.json({ message: "Uspešno obrisano" });
-  } catch (err) {
-    res.status(500).json({ error: "Greška pri brisanju" });
-  }
+  await Task.findByIdAndDelete(req.params.id);
+  res.json({ message: "Obrisano" });
 });
 
-// health check (profi detalj)
+// health
 app.get("/health", (req, res) => {
   res.send("API radi 🚀");
 });

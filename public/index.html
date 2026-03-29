@@ -1,94 +1,134 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Task App</title>
+  <title>Task App PRO</title>
+
+  <style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 500px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .topbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  input, select, button {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+  }
+
+  input {
+    flex: 1;
+  }
+
+  button {
+    background: #667eea;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #5a67d8;
+  }
+
+  .task-group {
+    margin-top: 20px;
+  }
+
+  .task-group h3 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+
+  .card {
+    background: #f9f9f9;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .completed {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  .high { border-left: 5px solid red; }
+  .medium { border-left: 5px solid orange; }
+  .low { border-left: 5px solid green; }
+
+  #search {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+</style>
 </head>
+
 <body>
 
-  <h1>🚀 Docker Task App</h1>
+<div class="container">
 
+<h1>Task App PRO</h1>
+
+<div class="topbar">
   <input id="taskInput" placeholder="Unesi task">
+
+  <select id="category">
+    <option>General</option>
+    <option>Work</option>
+    <option>School</option>
+  </select>
+
+  <select id="priority">
+    <option value="low">Low</option>
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+  </select>
+
   <button onclick="addTask()">Dodaj</button>
+</div>
 
-  <ul id="taskList"></ul>
+<input id="search" placeholder="Pretraga..." oninput="loadTasks()">
 
-  <script>
-    const API = "http://localhost:3000";
+<div id="taskList"></div>
 
-    async function loadTasks() {
-      const res = await fetch(API + "/tasks");
-      const tasks = await res.json();
+<div id="stats"></div>
 
-      const list = document.getElementById("taskList");
-      list.innerHTML = "";
+</div>
 
-      tasks.forEach(t => {
-        const li = document.createElement("li");
-        li.id = "task-" + t._id;
-
-        li.innerHTML = `
-          <span>${t.title}</span>
-          <button onclick="startEdit('${t._id}', '${t.title}')">✏️</button>
-          <button onclick="deleteTask('${t._id}')">❌</button>
-        `;
-
-        list.appendChild(li);
-      });
-    }
-
-    async function addTask() {
-      const input = document.getElementById("taskInput");
-      const title = input.value;
-
-      if (!title) return;
-
-      await fetch(API + "/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title })
-      });
-
-      input.value = "";
-      loadTasks();
-    }
-
-    async function deleteTask(id) {
-      await fetch(API + "/tasks/" + id, {
-        method: "DELETE"
-      });
-
-      loadTasks();
-    }
-
-    // 🔥 INLINE EDIT START
-    function startEdit(id, oldTitle) {
-      const li = document.getElementById("task-" + id);
-
-      li.innerHTML = `
-        <input id="edit-${id}" value="${oldTitle}" />
-        <button onclick="saveEdit('${id}')">✔</button>
-        <button onclick="loadTasks()">❌</button>
-      `;
-    }
-
-    async function saveEdit(id) {
-      const newTitle = document.getElementById("edit-" + id).value;
-
-      if (!newTitle) return;
-
-      await fetch(API + "/tasks/" + id, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title: newTitle }),
-      });
-
-      loadTasks();
-    }
-
-    loadTasks();
-  </script>
+<script src="app.js"></script>
 
 </body>
 </html>
